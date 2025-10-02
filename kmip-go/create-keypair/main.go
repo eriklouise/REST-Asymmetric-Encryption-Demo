@@ -40,11 +40,10 @@ func loadConfig(filePath string) (*Config, error) {
 
 func main() {
 	// 1. LOAD CONFIGURATION
-	cfg, err := loadConfig("config.json")
+	cfg, err := loadConfig("../config.json")
 	if err != nil {
 		log.Fatalf("Configuration error: %v", err)
 	}
-
 	fmt.Printf("Loaded configuration: %+v\n", cfg)
 
 	// Connect with comprehensive options
