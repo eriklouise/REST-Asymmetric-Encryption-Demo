@@ -1,0 +1,13 @@
+{
+    "kmip_host": "kmip.ciphertrustmanager.local:5696",
+    "client_cert": "../secrets/DemoOrg_KMIPClient_client_cert.pem",
+    "client_key": "../secrets/DemoOrg_KMIPClient_client_key.pem",
+    "ca_cert": "../secrets/Certificate.pem",
+    "key_name": "DemoKMIP",
+    "key_length": 4096,
+    "public_keyid_file": "../secrets/DemoKMIP_PublicKey_ID.txt",
+    "private_keyid_file": "../secrets/DemoKMIP_PrivateKey_ID.txt",
+    "aes_key_file": "../secrets/DemoKMIP_AESKey_ID.txt",
+    "aes_iv_file": "../secrets/aes_gcm_iv.bin",
+    "aes_wrapped_file": "../secrets/aes_wrapped_key.bin"
+}
