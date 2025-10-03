@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/ovh/kmip-go"
 	"github.com/ovh/kmip-go/kmipclient"
 )
 
@@ -53,28 +54,35 @@ func main() {
 		kmipclient.WithRootCAFile(cfg.CACert), // Custom CA certificate
 		kmipclient.WithClientCertFiles(cfg.ClientCert, cfg.ClientKey),
 	)
-
 	if err != nil {
 		log.Fatalf("Failed to connect to KMIP server: %v", err)
 	}
 
-	// Find keys by id
-	keys := client.Locate().
+	var rsaPublicKeyMaterial []byte
+
+	asymKey := &kmip.PublicKey{
+		KeyBlock: kmip.KeyBlock{
+			KeyFormatType: kmip.KeyFormatTypePKCS_8,
+			KeyValue: &kmip.KeyValue{
+				Plain: &kmip.PlainKeyValue{
+					KeyMaterial: kmip.KeyMaterial{
+						Bytes: &rsaPublicKeyMaterial,
+					},
+				},
+			},
+			CryptographicAlgorithm: kmip.CryptographicAlgorithmRSA,
+			CryptographicLength:    int32(cfg.KeyLength),
+		},
+	}
+
+	// Register the key with attributes
+	resp, err := client.Register().
+		Object(asymKey).
 		WithName(fmt.Sprintf("%s_Public", cfg.KeyName)).
-		MustExec()
-
-	for _, keyID := range keys.UniqueIdentifier {
-		fmt.Printf("Found key: %s\n", keyID)
-
-		// Get all attributes
-		allAttrs := client.GetAttributes(keyID).MustExec()
-
-		for _, attr := range allAttrs.Attribute {
-			fmt.Printf("Attribute: %s = %v\n", attr.AttributeName, attr.AttributeValue)
-		}
-	}
-
+		Exec()
 	if err != nil {
-		log.Fatalf("Failed to connect to KMIP server: %v", err)
+		log.Fatal(err)
 	}
+
+	fmt.Printf("Registered key with ID: %s\n", resp.UniqueIdentifier)
 }
