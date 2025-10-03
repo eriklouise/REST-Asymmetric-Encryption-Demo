@@ -49,6 +49,9 @@ def authenticate_and_get_token(username, password):
     }
     
     try:
+        # Disable warnings for self-signed certificates (for demo purposes only)
+        urllib3.disable_warnings()
+
         # NOTE: Use verify=False only for testing with self-signed certificates.
         # In production, use the path to your CA bundle (e.g., verify="/path/to/ca.pem").
         response = requests.post(AUTH_ENDPOINT, headers=headers, json=auth_payload, verify=False)
@@ -112,10 +115,14 @@ def generate_asymmetric_key(bearer_token):
 
         # Successful response (usually 201 Created or 200 OK)
         key_data = response.json()
+        KeyId = key_data.get('id')
 
-        print(f"Key created successfully: {key_data}")
-
-        privateKeyId = token_data.get('jwt')
+        if KeyId:
+            print(f"Key ID: {KeyId}")
+            # Store the Key ID in a file for later use
+            store_in_opensecrets(f'{KEY_NAME}_KeyID.txt', KeyId)
+        else:
+            print("Warning: Key ID not found in the response.")
         
     except requests.exceptions.HTTPError as errh:
         print(f"\nHTTP Error occurred: {errh}")
@@ -136,8 +143,11 @@ def generate_asymmetric_key(bearer_token):
         print(f"\nAn unexpected error occurred: {e}")
 
 # --- Function to store data in file ---
-def store_in_file(filename, filecontent):
-    with open(filename, 'w') as file:
+def store_in_opensecrets(filename, filecontent):
+    if not os.path.exists('./secrets'):
+        os.makedirs('./secrets')
+
+    with open(f'./secrets/{filename}', 'w') as file:
         file.write(filecontent)
     print(f"Content successfully written to {filename}")
 
