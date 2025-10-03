@@ -1,18 +1,38 @@
+#*********************************************************************************
+#                                                                                *
+# This file is part of the "CTM REST Asymmetric key demo" project.               *
+# Use it at your own risk                                                        *
+# Distributed under Apache 2.0 license                                           *
+#                                                                                *
+# Written by Erik LOUISE                                                         *
+# Copyright © 2025 Thales Group                                                  *
+#                                                                                *
+#*********************************************************************************
+
+# OBJECTIVE :
+# - Create a local AES-GCM key and IV and store them in files
+# - The key and IV are generated using a cryptographically secure random number generator
+# - The key and IV are stored in the ./secrets directory    
+
 import os
+import config
 from secrets import token_bytes
 
-KEY_SIZE = 32  # 256 bits for AES-256-GCM
-IV_SIZE = 12   # 12 bytes for GCM
+KEY_SIZE = config.KEY_SIZE
+IV_SIZE = config.IV_SIZE
 
-SECRETS_DIR = './secrets'
-KEY_FILE = 'AES_GCM_Key.bin'
-IV_FILE = 'AES_GCM_IV.bin'
+SECRETS_DIR = config.SECRETS_DIR
+KEY_FILE = config.AES_KEY_FILE
+IV_FILE = config.IV_FILE
 
 def ensure_secrets_dir():
     if not os.path.exists(SECRETS_DIR):
         os.makedirs(SECRETS_DIR)
 
 def save_secret(filename, data):
+    if not os.path.exists(SECRETS_DIR):
+        os.makedirs(SECRETS_DIR)
+
     with open(os.path.join(SECRETS_DIR, filename), 'wb') as f:
         f.write(data)
     print(f"Saved {filename} in {SECRETS_DIR}")

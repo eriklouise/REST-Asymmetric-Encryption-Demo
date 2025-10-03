@@ -1,3 +1,19 @@
+#*********************************************************************************
+#                                                                                *
+# This file is part of the "CTM REST Asymmetric key demo" project.               *
+# Use it at your own risk                                                        *
+# Distributed under Apache 2.0 license                                           *
+#                                                                                *
+# Written by Erik LOUISE                                                         *
+# Copyright © 2025 Thales Group                                                  *
+#                                                                                *
+#*********************************************************************************
+
+# OBJECTIVE :
+# - Retrieve the public RSA key from CipherTrust Manager using REST API
+# - Encrypt the AES key and IV files created in previous step with this RSA public key
+# - Store the encrypted AES key and IV files in the 'secrets' directory
+
 import os
 import requests
 import urllib3
@@ -6,18 +22,19 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import hashes
 
-SECRETS_DIR = './secrets'
-RSA_KEY_ID_FILE = f"{config.ASYM_KEY_NAME}_KeyID.txt"
-AES_KEY_FILE = "AES_GCM_Key.bin"
-IV_FILE = "AES_GCM_IV.bin"
-ENC_AES_KEY_FILE = "AES_GCM_Key_encrypted.bin"
-ENC_IV_FILE = "AES_GCM_IV_encrypted.bin"
+# --- Configuration (see config.py) ---
+SECRETS_DIR = config.SECRETS_DIR
+RSA_KEY_ID_FILE = config.RSA_KEY_ID_FILE
+AES_KEY_FILE = config.AES_KEY_FILE
+IV_FILE = config.IV_FILE
+ENC_AES_KEY_FILE = config.ENC_AES_KEY_FILE
+ENC_IV_FILE = config.ENC_IV_FILE
 
 CM_HOST = config.CTM_HOST
 CM_USERNAME = config.CTM_USER
 CM_PASSWORD = config.CTM_PASSWORD
-AUTH_ENDPOINT = f"https://{CM_HOST}/api/v1/auth/tokens/"
-KEY_EXPORT_ENDPOINT = f"https://{CM_HOST}/api//v1/vault/keys2/{{key_id}}/"
+AUTH_ENDPOINT = config.CTM_AUTH_ENDPOINT
+KEY_EXPORT_ENDPOINT = config.CTM_KEY_EXPORT_ENDPOINT
 
 # --- Function get bearer token ---
 def authenticate_and_get_token(username, password):
@@ -84,10 +101,16 @@ def get_rsa_public_key(bearer_token, key_id):
     return pubkey_pem.encode()
 
 def load_file(filename):
+    if not os.path.exists(SECRETS_DIR):
+        os.makedirs(SECRETS_DIR)
+
     with open(os.path.join(SECRETS_DIR, filename), 'rb') as f:
         return f.read()
 
 def save_file(filename, data):
+    if not os.path.exists(SECRETS_DIR):
+        os.makedirs(SECRETS_DIR)
+
     with open(os.path.join(SECRETS_DIR, filename), 'wb') as f:
         f.write(data)
     print(f"Saved {filename} in {SECRETS_DIR}")

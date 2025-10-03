@@ -1,3 +1,17 @@
+#*********************************************************************************
+#                                                                                *
+# This file is part of the "CTM REST Asymmetric key demo" project.               *
+# Use it at your own risk                                                        *
+# Distributed under Apache 2.0 license                                           *
+#                                                                                *
+# Written by Erik LOUISE                                                         *
+# Copyright © 2025 Thales Group                                                  *
+#                                                                                *
+#*********************************************************************************
+
+# OBJECTIVE :
+# - Create an RSA-4096 asymmetric key in CipherTrust Manager via REST API
+
 import requests
 import json
 import os
@@ -5,7 +19,7 @@ import sys
 import config
 import urllib3
 
-# --- Configuration (UPDATE THESE VALUES) ---
+# --- Configuration (see config.py) ---
 
 # The hostname or IP address of your CipherTrust Manager appliance
 CM_HOST = config.CTM_HOST
@@ -18,9 +32,8 @@ KEY_NAME = config.ASYM_KEY_NAME
 KEY_LENGTH = config.ASYM_KEY_LENGTH
 KEY_ALGO = config.ASYM_ALGO
 
-# Your CipherTrust Manager API token (Bearer token)
-# NOTE: In a real application, you'd get this from a separate authentication call.
-API_TOKEN = os.getenv("CM_API_TOKEN", "YOUR_ACTUAL_API_TOKEN_HERE") 
+# Directory to store secrets (make sure this directory exists or the script can create it)
+SECRETS_DIR = config.SECRETS_DIR
 
 # Cryptographic Usage Mask Calculation (Decimal Value)
 USAGE_MASK = config.ASYM_KEY_USAGE_MASK
@@ -28,8 +41,8 @@ USAGE_MASK = config.ASYM_KEY_USAGE_MASK
 # --- API Details ---
 
 # Base path for key creation (Standard API endpoint)
-AUTH_ENDPOINT = f"https://{CM_HOST}/api/v1/auth/tokens/"
-API_ENDPOINT = f"https://{CM_HOST}/api/v1/vault/keys2/" 
+AUTH_ENDPOINT = config.CTM_AUTH_ENDPOINT
+API_ENDPOINT = config.CTM_API_ENDPOINT
 
 # --- Function get bearer token ---
 def authenticate_and_get_token(username, password):
@@ -144,10 +157,10 @@ def generate_asymmetric_key(bearer_token):
 
 # --- Function to store data in file ---
 def store_in_opensecrets(filename, filecontent):
-    if not os.path.exists('./secrets'):
-        os.makedirs('./secrets')
+    if not os.path.exists(SECRETS_DIR):
+        os.makedirs(SECRETS_DIR)
 
-    with open(f'./secrets/{filename}', 'w') as file:
+    with open(f'{SECRETS_DIR}/{filename}', 'w') as file:
         file.write(filecontent)
     print(f"Content successfully written to {filename}")
 
