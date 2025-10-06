@@ -1,4 +1,4 @@
-# REST Assymetric Encryption Demo
+# REST Asymmetric Encryption Demo
 
 This little demo project shows how to:
 1. Connect in python to Ciphertrust Manager instance (getting the Bearer Token, etc...).
@@ -26,6 +26,7 @@ Requirements for the software and other tools to build, test and push
 ## License
 
 This project is licensed under the [Apache 2.0](LICENSE) License
+
 
 
 
