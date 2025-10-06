@@ -23,4 +23,5 @@ Requirements for the software and other tools to build, test and push
 
 ## License
 
-This project is licensed under the [Apache 2.0](LICENSE.md)
+This project is licensed under the [Apache 2.0](LICENSE)
+
