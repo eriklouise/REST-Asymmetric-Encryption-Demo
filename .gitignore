@@ -1,4 +1,6 @@
 /.DS_Store
 /.vscode
+/__pycache__
 /secrets
-with REST-API/secrets/
+/payload/*_PubKeyID.txt
+/payload/*_PrivKeyID.txt
