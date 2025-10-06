@@ -10,39 +10,25 @@
 #*********************************************************************************
 
 # OBJECTIVE :
-# - Create a local AES-GCM key and IV and store them in files
-# - The key and IV are generated using a cryptographically secure random number generator
-# - The key and IV are stored in the ./secrets directory    
+# - compare the original clear payload with the decrypted payload
+# - The original clear payload is stored in ./payload/clear_payload.txt
+# - The decrypted payload is stored in ./payload/unencrypted_payload.txt
 
-import os
 import config
-from secrets import token_bytes
 
-KEY_SIZE = config.KEY_SIZE
-IV_SIZE = config.IV_SIZE
+CLEAR_PAYLOAD_FILE = config.CLEAR_PAYLOAD_FILE
+UNENCRYPTED_PAYLOAD_FILE = config.UNENCRYPTED_PAYLOAD_FILE
 
-SECRETS_DIR = config.SECRETS_DIR
-KEY_FILE = config.AES_KEY_FILE
-IV_FILE = config.IV_FILE
-
-def ensure_secrets_dir():
-    if not os.path.exists(SECRETS_DIR):
-        os.makedirs(SECRETS_DIR)
-
-def save_secret(filename, data):
-    if not os.path.exists(SECRETS_DIR):
-        os.makedirs(SECRETS_DIR)
-
-    with open(os.path.join(SECRETS_DIR, filename), 'wb') as f:
-        f.write(data)
-    print(f"Saved {filename} in {SECRETS_DIR}")
+def files_are_identical(file1, file2):
+    with open(file1, 'rb') as f1, open(file2, 'rb') as f2:
+        return f1.read() == f2.read()
 
 def main():
-    ensure_secrets_dir()
-    key = token_bytes(KEY_SIZE)
-    iv = token_bytes(IV_SIZE)
-    save_secret(KEY_FILE, key)
-    save_secret(IV_FILE, iv)
+    if files_are_identical(CLEAR_PAYLOAD_FILE, UNENCRYPTED_PAYLOAD_FILE):
+        print(f"'{CLEAR_PAYLOAD_FILE}' and '{UNENCRYPTED_PAYLOAD_FILE}' are identical.")
+    else:
+        print(f"'{CLEAR_PAYLOAD_FILE}' and '{UNENCRYPTED_PAYLOAD_FILE}' are different.")
 
+# --- Main process ---
 if __name__ == "__main__":
     main()

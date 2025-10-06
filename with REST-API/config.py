@@ -19,21 +19,22 @@ CTM_PASSWORD = "RestPassword123*"
 CTM_AUTH_ENDPOINT = f"https://{CTM_HOST}/api/v1/auth/tokens/"    
 CTM_API_ENDPOINT = f"https://{CTM_HOST}/api/v1/vault/keys2/"     
 CTM_KEY_EXPORT_ENDPOINT = f"https://{CTM_HOST}/api//v1/vault/keys2/{{key_id}}/"
+CTM_ENCRYPT_ENDPOINT = f"https://{CTM_HOST}/api/v1/crypto/encrypt/"
+CTM_DECRYPT_ENDPOINT = f"https://{CTM_HOST}/api/v1/crypto/decrypt/"
+
+# Local secret storage configuration
+SECRETS_DIR = './secrets'
+PAYLOAD_DIR = './payload'
 
 # Asymmetric Key Configuration
 ASYM_ALGO = "RSA"
 ASYM_KEY_LENGTH = 4096
 ASYM_KEY_NAME = "DemoREST"
 ASYM_KEY_USAGE_MASK = 124  # Sign + Verify + Wrap Key + Unwrap Key
-RSA_KEY_ID_FILE = f"{ASYM_KEY_NAME}_KeyID.txt"
+RSA_PUBKEY_ID_FILE = f"{SECRETS_DIR}/{ASYM_KEY_NAME}_PubKeyID.txt"
+RSA_PRIVKEY_ID_FILE = f"{SECRETS_DIR}/{ASYM_KEY_NAME}_PrivKeyID.txt"
 
-# Local secret storage configuration
-SECRETS_DIR = './secrets'
-
-# AES-GCM Key Configuration
-AES_KEY_FILE = "AES_GCM_Key.bin"
-IV_FILE = "AES_GCM_IV.bin"
-ENC_AES_KEY_FILE = "AES_GCM_Key_encrypted.bin"
-ENC_IV_FILE = "AES_GCM_IV_encrypted.bin"
-KEY_SIZE = 32  # 256 bits for AES-256-GCM
-IV_SIZE = 12   # 12 bytes for GCM
+# Payload files configuration
+CLEAR_PAYLOAD_FILE = f"{PAYLOAD_DIR}/clear_payload.txt"
+ENCRYPTED_PAYLOAD_FILE = f"{PAYLOAD_DIR}/encrypted_base64_payload.txt"
+UNENCRYPTED_PAYLOAD_FILE = f"{PAYLOAD_DIR}/unencrypted_payload.txt"

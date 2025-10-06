@@ -34,6 +34,8 @@ KEY_ALGO = config.ASYM_ALGO
 
 # Directory to store secrets (make sure this directory exists or the script can create it)
 SECRETS_DIR = config.SECRETS_DIR
+RSA_PUBKEY_ID_FILE = config.RSA_PUBKEY_ID_FILE
+RSA_PRIVKEY_ID_FILE = config.RSA_PRIVKEY_ID_FILE
 
 # Cryptographic Usage Mask Calculation (Decimal Value)
 USAGE_MASK = config.ASYM_KEY_USAGE_MASK
@@ -116,8 +118,6 @@ def generate_asymmetric_key(bearer_token):
         "usageMask": USAGE_MASK
     }
     
-    print(f"Attempting to create key '{KEY_NAME}' with size {KEY_LENGTH} and usageMask {USAGE_MASK}...")
-
     try:
         # Disable warnings for self-signed certificates (for demo purposes only)
         urllib3.disable_warnings()
@@ -128,14 +128,22 @@ def generate_asymmetric_key(bearer_token):
 
         # Successful response (usually 201 Created or 200 OK)
         key_data = response.json()
-        KeyId = key_data.get('id')
+        PubKeyId = key_data.get('links')[0].get('targetID')
+        PrivKeyId = key_data.get('links')[0].get('sourceID')
 
-        if KeyId:
-            print(f"Key ID: {KeyId}")
-            # Store the Key ID in a file for later use
-            store_in_opensecrets(f'{KEY_NAME}_KeyID.txt', KeyId)
+        if PubKeyId:
+            print(f"Public Key ID: {PubKeyId}")
+            # Store the Public Key ID in a file for later use
+            store_in_opensecrets(RSA_PUBKEY_ID_FILE, PubKeyId)
         else:
-            print("Warning: Key ID not found in the response.")
+            print("Warning: Public Key ID not found in the response.")
+
+        if PrivKeyId:
+            print(f"Private Key ID: {PrivKeyId}")
+            # Store the Private Key ID in a file for later use
+            store_in_opensecrets(RSA_PRIVKEY_ID_FILE, PrivKeyId)
+        else:
+            print("Warning: Private Key ID not found in the response.")
         
     except requests.exceptions.HTTPError as errh:
         print(f"\nHTTP Error occurred: {errh}")
@@ -155,20 +163,33 @@ def generate_asymmetric_key(bearer_token):
     except Exception as e:
         print(f"\nAn unexpected error occurred: {e}")
 
+    return True
+
 # --- Function to store data in file ---
 def store_in_opensecrets(filename, filecontent):
     if not os.path.exists(SECRETS_DIR):
         os.makedirs(SECRETS_DIR)
 
-    with open(f'{SECRETS_DIR}/{filename}', 'w') as file:
+    with open(f'filename', 'w') as file:
         file.write(filecontent)
     print(f"Content successfully written to {filename}")
 
 # --- Execution ---
 if __name__ == "__main__":
     # Step 1: Get the token
+    print("Step 1: Authentication to CipherTrust Manager")
     bearer_token = authenticate_and_get_token(CM_USERNAME, CM_PASSWORD)
+    if not bearer_token:
+        print("Failed to obtain bearer token. Exiting.")
+        sys.exit(1)
+    
+    print("Bearer token obtained.")
 
-    if bearer_token:
-        # Step 2: Create the key
-        generate_asymmetric_key(bearer_token)
+    # Step 2: Create the key
+    print(f"Step 2: Create {KEY_ALGO}-{KEY_LENGTH} Asymmetric Key in CipherTrust Manager")
+    result = generate_asymmetric_key(bearer_token)
+    if not result:
+        print("Key creation failed.")
+        sys.exit(1)
+
+    print("Key creation process completed.")

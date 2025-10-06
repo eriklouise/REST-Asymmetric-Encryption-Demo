@@ -10,31 +10,32 @@
 #*********************************************************************************
 
 # OBJECTIVE :
-# - Retrieve the public RSA key from CipherTrust Manager using REST API
-# - Encrypt the AES key and IV files created in previous step with this RSA public key
-# - Store the encrypted AES key and IV files in the 'secrets' directory
+# - Encrypt the content of the ./payload/clear_payload.txt content remotely on CipherTrust Manager using public RSA key ID (Key material is stored in CTM)
+# - Store the encrypted content in ./payload/encrypted_base64_payload.txt
 
 import os
 import requests
 import urllib3
 import config
+import json
+import base64
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import hashes
 
 # --- Configuration (see config.py) ---
 SECRETS_DIR = config.SECRETS_DIR
-RSA_KEY_ID_FILE = config.RSA_KEY_ID_FILE
-AES_KEY_FILE = config.AES_KEY_FILE
-IV_FILE = config.IV_FILE
-ENC_AES_KEY_FILE = config.ENC_AES_KEY_FILE
-ENC_IV_FILE = config.ENC_IV_FILE
+PAYLOAD_DIR = config.PAYLOAD_DIR
+RSA_PUBKEY_ID_FILE = config.RSA_PUBKEY_ID_FILE
+CLEAR_PAYLOAD_FILE = config.CLEAR_PAYLOAD_FILE
+ENCRYPTED_PAYLOAD_FILE = config.ENCRYPTED_PAYLOAD_FILE
 
 CM_HOST = config.CTM_HOST
 CM_USERNAME = config.CTM_USER
 CM_PASSWORD = config.CTM_PASSWORD
 AUTH_ENDPOINT = config.CTM_AUTH_ENDPOINT
 KEY_EXPORT_ENDPOINT = config.CTM_KEY_EXPORT_ENDPOINT
+ENCRYPT_ENDPOINT = config.CTM_ENCRYPT_ENDPOINT
 
 # --- Function get bearer token ---
 def authenticate_and_get_token(username, password):
@@ -100,65 +101,90 @@ def get_rsa_public_key(bearer_token, key_id):
         raise Exception("Public key not found in response.")
     return pubkey_pem.encode()
 
-def load_file(filename):
-    if not os.path.exists(SECRETS_DIR):
-        os.makedirs(SECRETS_DIR)
+# --- Function to encrypt data using CipherTrust Manager ---
+def encrypt_with_ctm(bearer_token, cleartext, rsa_key_id):
+    headers = {
+        "Authorization": f"Bearer {bearer_token}",
+        "Accept": "application/json"
+    }
 
-    with open(os.path.join(SECRETS_DIR, filename), 'rb') as f:
+    # Create JSON structure
+    plaintext_b64 = base64.b64encode(cleartext).decode('utf-8')
+    # Be sure to use a consistent padding scheme between encrypt and decrypt
+    full_query = {
+        "id": rsa_key_id,
+        "plaintext": plaintext_b64,
+        "pad": "OAEP256" #Valid values for asymmetric algorithms, the valid values are PKCS1, OAEP, OAEP256, OAEP384, and OAEP512. The default is OAEP. See https://thalesdocs.com/ctp/cm/latest/reference/cckmapi/ora-ext-apis/ora-ext-invoked-apis/ora-ext-encrypt-data/index.html
+    }
+
+    urllib3.disable_warnings()
+    response = requests.post(ENCRYPT_ENDPOINT, headers=headers, json=full_query, verify=False)
+    response.raise_for_status()
+
+    if not response.json().get("ciphertext"):
+        raise Exception("Ciphertext not found in response.")
+
+    return response.json().get("ciphertext")
+
+# --- File operations ---
+def load_file(filename):
+    with open(filename, 'r') as f:
         return f.read()
 
 def save_file(filename, data):
     if not os.path.exists(SECRETS_DIR):
         os.makedirs(SECRETS_DIR)
+    
+    if not os.path.exists(PAYLOAD_DIR):
+        os.makedirs(PAYLOAD_DIR)
 
-    with open(os.path.join(SECRETS_DIR, filename), 'wb') as f:
+    with open(filename, 'w') as f:
         f.write(data)
-    print(f"Saved {filename} in {SECRETS_DIR}")
+    print(f"Saved {filename}")
 
+# --- Main process ---
 def main():
     # Step 1: Get the token
+    print("Step 1: Authentication to CipherTrust Manager")
     bearer_token = authenticate_and_get_token(CM_USERNAME, CM_PASSWORD)
     if not bearer_token:
         print("Failed to obtain bearer token. Exiting.")
         return
+    
+    print("Bearer token obtained.")
 
     # Step 2: Read RSA key ID
-    with open(os.path.join(SECRETS_DIR, RSA_KEY_ID_FILE), 'r') as f:
-        rsa_key_id = f.read().strip()
-
-    print(f"Using RSA Key ID: {rsa_key_id}")
+    print("Step 2: Reading RSA Key ID...")
+    rsa_key_id = load_file(RSA_PUBKEY_ID_FILE)
     if not rsa_key_id:
         print("RSA Key ID is empty. Exiting.")
-        return 
+        return
+    
+    print(f"Using RSA Key ID: {rsa_key_id}")
 
-    # Step 3: Get public RSA key
-    pubkey_pem = get_rsa_public_key(bearer_token, rsa_key_id)
-    public_key = serialization.load_pem_public_key(pubkey_pem)
+    # Step 3: Load the clear payload content
+    print("Step 4: Loading clear payload...")
+    clear_payload = load_file(CLEAR_PAYLOAD_FILE).encode("utf-8")
+    if not clear_payload:
+        print("Payload empty. Exiting.")
+        return
+    
+    print("Clear payload loaded.")
 
-    # Step 4: Load AES key and IV
-    aes_key = load_file(AES_KEY_FILE)
-    iv = load_file(IV_FILE)
+    # Step 4: Encrypt using CipherTrust Manager
+    print("Step 5: Encrypting payload with RSA public key on CipherTrust Manager...")
+    encrypted_payload_response = encrypt_with_ctm(bearer_token, clear_payload, rsa_key_id)
+    if not encrypted_payload_response:
+        print("Encryption failed. Exiting.")
+        return
+    
+    print("Payload encrypted.")
 
-    # Step 5: Encrypt AES key and IV
-    enc_aes_key = public_key.encrypt(
-        aes_key,
-        padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA256()),
-            algorithm=hashes.SHA256(),
-            label=None
-        )
-    )
-    enc_iv = public_key.encrypt(
-        iv,
-        padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA256()),
-            algorithm=hashes.SHA256(),
-            label=None
-        )
-    )
-    # Step 6: Store encrypted files
-    save_file(ENC_AES_KEY_FILE, enc_aes_key)
-    save_file(ENC_IV_FILE, enc_iv)
+    # Step 5: Store encrypted files
+    print("Step 5: Storing encrypted payload...")
+    save_file(ENCRYPTED_PAYLOAD_FILE, encrypted_payload_response)
+    print(f"Encrypted payload stored successfully in {ENCRYPTED_PAYLOAD_FILE}")
 
+# --- Main execution ---
 if __name__ == "__main__":
     main()
