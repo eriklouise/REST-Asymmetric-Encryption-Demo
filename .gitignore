@@ -1,6 +1,6 @@
 /.DS_Store
 /.vscode
 /__pycache__
-/secrets
-/payload/*_PubKeyID.txt
-/payload/*_PrivKeyID.txt
+/secrets/*
+/payload/unencrypted_*.txt
+/payload/encrypted_*.txt
