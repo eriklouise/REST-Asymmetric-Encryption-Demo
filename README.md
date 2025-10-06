@@ -22,10 +22,12 @@ Requirements for the software and other tools to build, test and push
 - Create a "Key Admin" user
 - Install python, git, etc...
 - Set the right variables in config.py
+- Launch menu.py
 
 ## License
 
 This project is licensed under the [Apache 2.0](LICENSE) License
+
 
 
 
