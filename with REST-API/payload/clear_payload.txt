@@ -1,2 +1,0 @@
-This is the clear payload I want to locally encrypt with an RSA Public Key from Ciphertrust Manager.
-Later I will want to decrypt on Ciphertrust Manager the encrypted payload with the private RSA key.

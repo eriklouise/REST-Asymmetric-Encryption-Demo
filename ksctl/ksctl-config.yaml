@@ -1,7 +1,0 @@
-KSCTL_VERBOSITY: false
-KSCTL_RESP: json
-KSCTL_USERNAME: adminuser
-KSCTL_PASSWORD: 5ecureP*ssw0rd
-KSCTL_URL: https://ctmperso
-KSCTL_NOSSLVERIFY: true
-KSCTL_AUTH_DOMAIN: root
