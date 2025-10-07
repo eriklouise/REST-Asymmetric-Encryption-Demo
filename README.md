@@ -8,6 +8,11 @@ This little demo project shows how to:
 5. Encrypt remotely (on the Ciphtertrust Manager instance) a payload using the RSA Public Key from Ciphertrust Manager.
 6. Decrypt remotely (on the Ciphtertrust Manager instance) previously ancrypted payloads using the RSA Private Key.
 
+## Disclaimer
+
+The provided code does not include any binaries, code or snippets licenced under commercial license.
+Ciphertrust Manager is a registered trademark of Thales Group.
+
 ## Getting Started
 
 These instructions will give you a copy of the project up and running on
@@ -22,10 +27,13 @@ Requirements for the software and other tools to build, test and push
 - Create a "Key Admin" user
 - Install python, git, etc...
 - Set the right variables in config.py
+- Launch menu.py
 
 ## License
 
 This project is licensed under the [Apache 2.0](LICENSE) License
+
+
 
 
 
