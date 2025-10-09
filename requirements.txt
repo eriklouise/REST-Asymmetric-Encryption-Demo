@@ -1,5 +1,4 @@
 # REST Asymmetric Encryption Demo Dependencies
-# Core dependencies for KMIP asymmetric key operations
 
 # HTTP requests and SSL handling
 requests>=2.25.0
@@ -8,6 +7,3 @@ urllib3>=1.26.0
 # Cryptographic operations
 cryptography>=3.4.0
 pycryptodome>=3.15.0
-
-# Optional: For more advanced KMIP operations (if needed)
-# PyKMIP>=0.10.0
