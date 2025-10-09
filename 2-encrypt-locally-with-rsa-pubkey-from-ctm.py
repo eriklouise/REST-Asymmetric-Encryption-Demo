@@ -21,11 +21,8 @@ import config
 import base64
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
-from Crypto.Hash import SHA256, SHA1
-from Crypto import Random
+from Crypto.Hash import SHA256 #, SHA1
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.primitives import hashes
 
 # --- Configuration (see config.py) ---
 SECRETS_DIR = config.SECRETS_DIR

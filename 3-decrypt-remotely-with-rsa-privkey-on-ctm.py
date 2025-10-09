@@ -18,7 +18,6 @@ import requests
 import urllib3
 import config
 import base64
-import json
 
 # Load configuration from config.py
 SECRETS_DIR = config.SECRETS_DIR

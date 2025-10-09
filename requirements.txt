@@ -1,9 +1,9 @@
 # REST Asymmetric Encryption Demo Dependencies
 
 # HTTP requests and SSL handling
-requests>=2.25.0
-urllib3>=1.26.0
+requests>=2.28.0
+urllib3>=1.26.12
 
-# Cryptographic operations
-cryptography>=3.4.0
-pycryptodome>=3.15.0
+# Cryptographic operations  
+cryptography>=40.0.0
+pycryptodome>=3.17.0

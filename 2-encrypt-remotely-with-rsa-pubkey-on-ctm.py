@@ -17,11 +17,7 @@ import os
 import requests
 import urllib3
 import config
-import json
 import base64
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.primitives import hashes
 
 # --- Configuration (see config.py) ---
 SECRETS_DIR = config.SECRETS_DIR

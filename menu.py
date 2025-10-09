@@ -16,7 +16,6 @@
 import os
 import sys
 import subprocess
-from typing import Dict, List
 
 class DemoMenu:
     def __init__(self):
