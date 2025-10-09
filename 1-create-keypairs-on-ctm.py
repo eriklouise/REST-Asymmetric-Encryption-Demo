@@ -113,7 +113,7 @@ def generate_asymmetric_key(bearer_token):
         "size": KEY_LENGTH,
         "format": "raw",
         "name": KEY_NAME,
-        "unexportable": False,
+        "unexportable": False, # This setting is for both public & private keys. For security reasons you should manually set the private key as unexportable via the CM UI after creation.
         "undeletable": False,
         "usageMask": USAGE_MASK
     }
@@ -192,4 +192,4 @@ if __name__ == "__main__":
         print("Key creation failed.")
         sys.exit(1)
 
-    print("Key creation process completed.")
+    print(f"Key creation process completed. For security reasons you should manually set the private key ({KEY_NAME}) as unexportable via the CM UI after creation.")
